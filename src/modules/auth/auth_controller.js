@@ -21,7 +21,7 @@ module.exports = {
           const payload = emailFound[0]
           delete payload.user_password
 
-          const token = jwt.sign({ ...payload }, '0W4LL3T', {
+          const token = jwt.sign({ ...payload }, 'RAHASIA', {
             expiresIn: '48h'
           })
 
@@ -42,12 +42,14 @@ module.exports = {
     try {
       const { userName, userEmail, userPassword } = req.body
 
-      const emailIsRegistered = await authModel.getDataConditions(userEmail)
+      const emailIsRegistered = await authModel.getDataConditions({
+        user_email: userEmail
+      })
       if (emailIsRegistered.length > 0) {
         return wrapper.response(
           res,
           409,
-          'The email you are trying to register is already registered'
+          'An email that you are trying to register is already exist.'
         )
       } else {
         const salt = bcrypt.genSaltSync(10)

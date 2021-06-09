@@ -1,6 +1,6 @@
+const fs = require('fs')
 const bcrypt = require('bcrypt')
 const wrapper = require('../../helpers/wrapper')
-
 const userModel = require('./user_model')
 
 module.exports = {
@@ -9,9 +9,28 @@ module.exports = {
       const { id } = req.params
       const result = await userModel.getUser(id)
       if (result.length > 0) {
-        return wrapper.response(res, 200, 'Success get users by ID', result)
+        return wrapper.response(res, 200, 'Success get user by ID', result)
       } else {
         return wrapper.response(res, 404, `Cannot find user with ID ${id}`)
+      }
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
+
+  getUserByPhone: async (req, res) => {
+    try {
+      const { userPhone } = req.query
+      const result = await userModel.getUserByPhone({ user_phone: userPhone })
+      if (result.length > 0) {
+        delete result[0].user_password
+        return wrapper.response(res, 200, 'Success get user by phone', result)
+      } else {
+        return wrapper.response(
+          res,
+          404,
+          `Cannot find user with phone number ${userPhone}`
+        )
       }
     } catch (error) {
       return wrapper.response(res, 400, 'Bad request', error)
@@ -47,6 +66,37 @@ module.exports = {
     }
   },
 
+  updateImage: async (req, res) => {
+    try {
+      const { id } = req.params
+
+      const dataToUpdate = await userModel.getUser(id)
+      if (dataToUpdate.length > 0) {
+        const imageToDelete = dataToUpdate[0].user_image
+        const isImageExist = fs.existsSync(`src/uploads/${imageToDelete}`)
+
+        if (isImageExist && imageToDelete) {
+          fs.unlink(`src/uploads/${imageToDelete}`, (err) => {
+            if (err) throw err
+          })
+        }
+
+        const result = await userModel.updateUser(
+          {
+            user_image: req.file ? req.file.filename : '',
+            user_updated_at: new Date(Date.now())
+          },
+          id
+        )
+        return wrapper.response(res, 200, 'Success Update User Image', result)
+      } else {
+        return wrapper.response(res, 404, 'Failed! No Data Is Updated')
+      }
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad Request', error)
+    }
+  },
+
   updatePassword: async (req, res) => {
     try {
       const { id } = req.params
@@ -64,7 +114,7 @@ module.exports = {
           const encryptedPassword = bcrypt.hashSync(newPassword, salt)
 
           const result = await userModel.updateUser(
-            { user_pin: encryptedPassword },
+            { user_password: encryptedPassword },
             id
           )
           delete result.user_password

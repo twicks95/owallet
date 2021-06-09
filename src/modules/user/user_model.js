@@ -3,7 +3,19 @@ const db = require('../../config/mysql')
 module.exports = {
   getUser: (id) => {
     return new Promise((resolve, reject) => {
-      db.query('SELECT * FROM users WHERE user_id = ?', id, (error, result) => {
+      db.query(
+        'SELECT * FROM users JOIN balance ON users.user_id = balance.user_id WHERE users.user_id = ?',
+        id,
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error))
+        }
+      )
+    })
+  },
+
+  getUserByPhone: (data) => {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM users WHERE ?', data, (error, result) => {
         !error ? resolve(result) : reject(new Error(error))
       })
     })
