@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const authModel = require('./auth_model')
+const balanceModel = require('../balance/balance_model')
 const wrapper = require('../../helpers/wrapper')
 
 module.exports = {
@@ -40,7 +41,7 @@ module.exports = {
 
   register: async (req, res) => {
     try {
-      const { userName, userEmail, userPassword } = req.body
+      const { userName, userEmail, userPhone, userPassword } = req.body
 
       const emailIsRegistered = await authModel.getDataConditions({
         user_email: userEmail
@@ -57,12 +58,33 @@ module.exports = {
         const setData = {
           user_name: userName,
           user_email: userEmail,
+          user_phone: userPhone,
           user_password: encryptedPassword
         }
         const result = await authModel.postData(setData)
         delete result.user_password
 
+        // Set default balance
+        await balanceModel.postBalance({
+          user_id: result.id,
+          balance: '0'
+        })
+
         return wrapper.response(res, 200, 'Success create user account', result)
+      }
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
+
+  checkingPin: async (req, res) => {
+    try {
+      const { pin, userPin } = req.body
+      const pinMatch = bcrypt.compareSync(pin, userPin)
+      if (pinMatch) {
+        return wrapper.response(res, 200, 'Correct PIN')
+      } else {
+        return wrapper.response(res, 401, 'Incorrect PIN!')
       }
     } catch (error) {
       return wrapper.response(res, 400, 'Bad request', error)
