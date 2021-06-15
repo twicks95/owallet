@@ -1,8 +1,11 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const authModel = require('./auth_model')
+const userModel = require('../user/user_model')
 const balanceModel = require('../balance/balance_model')
 const wrapper = require('../../helpers/wrapper')
+// const nodemailer = require('nodemailer')
+require('dotenv').config()
 
 module.exports = {
   login: async (req, res) => {
@@ -70,6 +73,34 @@ module.exports = {
           balance: '0'
         })
 
+        // Send email for verify account
+        // const transporter = nodemailer.createTransport({
+        //   host: 'smtp.gmail.com',
+        //   port: 587,
+        //   secure: false, // true for 465, false for other ports
+        //   auth: {
+        //     user: process.env.SMTP_EMAIL, // generated ethereal user
+        //     pass: process.env.SMTP_PASSWORD // generated ethereal password
+        //   }
+        // })
+
+        // const mailOptions = await transporter.sendMail({
+        //   from: '<uvies.movs@gmail.com>', // sender address
+        //   to: userEmail, // list of receivers
+        //   subject: 'Owallet - Email account activation', // Subject line
+        //   html: `<a href="http://${process.env.DB_HOST}:${process.env.DB_PORT}/api/v1/auth/account/activate/${result.id}">Click this link</a><b> to activate your account.</b>` // html body
+        // })
+
+        // transporter.sendMail(mailOptions, function (error, info) {
+        //   if (!error) {
+        //     // console.log('Email sent: ' + info.response)
+        //     return wrapper.response(res, 200, 'Success Register User')
+        //   } else {
+        //     // console.log(error)
+        //     return wrapper.response(res, 400, 'Failed To Send Email')
+        //   }
+        // })
+
         return wrapper.response(res, 200, 'Success create user account', result)
       }
     } catch (error) {
@@ -119,6 +150,16 @@ module.exports = {
       }
     } catch (error) {
       return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
+
+  updateAccountStatus: async (req, res) => {
+    try {
+      const { id } = req.params
+      const result = await userModel.updateUser({ user_verified: 1 }, id)
+      return wrapper.response(res, 200, 'Success Update Account Status', result)
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad Request', error)
     }
   }
 }
