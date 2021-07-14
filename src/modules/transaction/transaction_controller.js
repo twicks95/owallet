@@ -3,6 +3,67 @@ const transactionModel = require('./transaction_model')
 const balanceModel = require('../balance/balance_model')
 
 module.exports = {
+  getIncome: async (req, res) => {
+    try {
+      const { id } = req.params
+      const result = await transactionModel.getIncome(id)
+      return wrapper.response(res, 200, 'Success get income', result)
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
+  getExpense: async (req, res) => {
+    try {
+      const { id } = req.params
+      const result = await transactionModel.getExpense(id)
+      return wrapper.response(res, 200, 'Success get expense', result)
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
+  getTransaction: async (req, res) => {
+    try {
+      const { id, by } = req.query
+      let { limit } = req.query
+
+      if (!limit) {
+        limit = 5
+      } else {
+        limit = parseInt(limit)
+      }
+
+      let queryCondition
+      if (by === 'week') {
+        queryCondition = 'AND WEEK(transaction_created_at) = WEEK(NOW())'
+      } else if (by === 'month') {
+        queryCondition = 'AND MONTH(transaction_created_at) = MONTH(NOW())'
+      } else if (by === 'all') {
+        queryCondition = ''
+      }
+
+      let message
+      if (by === 'week') {
+        message = 'Success get transaction data by week'
+      } else if (by === 'month') {
+        message = 'Success get transaction data by month'
+      } else {
+        message = 'Success get all transaction data'
+      }
+
+      const result = await transactionModel.getTransaction(
+        id,
+        queryCondition,
+        limit
+      )
+      if (result.length > 0) {
+        return wrapper.response(res, 200, message, result)
+      } else {
+        return wrapper.response(res, 404, 'No transaction data', result)
+      }
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
   createTransaction: async (req, res) => {
     try {
       const { receiverId, senderId, amount, notes } = req.body
@@ -42,6 +103,15 @@ module.exports = {
       } else {
         return wrapper.response(res, 402, 'Failed!', result)
       }
+    } catch (error) {
+      return wrapper.response(res, 400, 'Bad request', error)
+    }
+  },
+  getTotalTransactionPerDay: async (req, res) => {
+    try {
+      const { id } = req.params
+      const result = await transactionModel.getTotalTransactionPerDay(id)
+      return wrapper.response(res, 200, 'Success', result)
     } catch (error) {
       return wrapper.response(res, 400, 'Bad request', error)
     }
