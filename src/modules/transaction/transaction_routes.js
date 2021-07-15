@@ -28,5 +28,10 @@ Route.post(
   authMiddleware.authentication,
   transactionController.createTransaction
 )
+Route.get(
+  '/export/:id',
+  authMiddleware.authentication,
+  transactionController.exportTransaction
+)
 
 module.exports = Route

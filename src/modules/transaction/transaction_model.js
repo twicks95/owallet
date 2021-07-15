@@ -20,6 +20,17 @@ module.exports = {
       )
     })
   },
+  getDataById: (id) => {
+    return new Promise((resolve, reject) => {
+      db.query(
+        'SELECT * FROM transaction WHERE transaction_id = ?',
+        id,
+        (error, result) => {
+          !error ? resolve(result) : reject(new Error(error))
+        }
+      )
+    })
+  },
   getIncome: (id) => {
     return new Promise((resolve, reject) => {
       db.query(
@@ -61,7 +72,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       db.query(
         `SELECT DAYNAME(transaction_created_at) AS day, SUM(transaction_amount) AS total 
-      FROM transaction WHERE (transaction_sender_id = '13' OR transaction_receiver_id = '13') 
+      FROM transaction WHERE transaction_receiver_id = ? 
       AND WEEK(transaction_created_at) = WEEK(NOW()) 
       GROUP BY DAYNAME(transaction_created_at)`,
         [id, id],
