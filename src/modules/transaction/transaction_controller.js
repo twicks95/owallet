@@ -3,7 +3,7 @@ const transactionModel = require('./transaction_model')
 const balanceModel = require('../balance/balance_model')
 const ejs = require('ejs')
 const pdf = require('html-pdf')
-const path = require('path')
+// const path = require('path')
 
 module.exports = {
   getIncome: async (req, res) => {
@@ -123,77 +123,39 @@ module.exports = {
     try {
       const { id } = req.params
       const fileName = `transfer-report-${id}.pdf`
-      // const result = await transactionModel.getDataById(id)
+      const result = await transactionModel.getDataById(id)
 
-      const students = [
-        {
-          name: 'Joy',
-          email: 'joy@example.com',
-          city: 'New York',
-          country: 'USA'
-        },
-        {
-          name: 'John',
-          email: 'John@example.com',
-          city: 'San Francisco',
-          country: 'USA'
-        },
-        {
-          name: 'Clark',
-          email: 'Clark@example.com',
-          city: 'Seattle',
-          country: 'USA'
-        },
-        {
-          name: 'Watson',
-          email: 'Watson@example.com',
-          city: 'Boston',
-          country: 'USA'
-        },
-        {
-          name: 'Tony',
-          email: 'Tony@example.com',
-          city: 'Los Angels',
-          country: 'USA'
+      ejs.renderFile(
+        'src/templates/report-transfer-template.ejs',
+        { result },
+        (err, data) => {
+          if (err) {
+            return wrapper.response(res, 400, 'Export failed 1', err)
+          } else {
+            const options = {
+              height: '11.25in',
+              width: '8.5in',
+              header: {
+                height: '20mm'
+              },
+              footer: {
+                height: '20mm'
+              }
+            }
+            pdf
+              .create(data, options)
+              .toFile('public/transfer/' + fileName, function (err, data) {
+                if (err) {
+                  return wrapper.response(res, 400, 'Export failed 2', err)
+                } else {
+                  return wrapper.response(res, 200, 'Export PDF success', {
+                    url: `http://localhost:3004/api/${fileName}`
+                  })
+                }
+              })
+          }
         }
-      ]
-      console.log(
-        path.join(__dirname, '../../templates', 'report-transfer-template.ejs')
       )
-      // ejs.renderFile(
-      //   path.join(__dirname, '../../templates', 'report-transfer-template.ejs'),
-      //   { students },
-      //   (err, data) => {
-      //     if (err) {
-      //       return wrapper.response(res, 400, 'Export failed', err)
-      //     } else {
-      //       const options = {
-      //         height: '11.25in',
-      //         width: '8.5in',
-      //         header: {
-      //           height: '20mm'
-      //         },
-      //         footer: {
-      //           height: '20mm'
-      //         }
-      //       }
-      //       pdf
-      //         .create(data, options)
-      //         .toFile(
-      //           path.join(__dirname, '../../public/transfer/', fileName),
-      //           function (err, data) {
-      //             if (err) {
-      //               return wrapper.response(res, 400, 'Export failed', err)
-      //             } else {
-      //               return wrapper.response(res, 200, 'Export PDF success', {
-      //                 url: `http://localhost:3004/api/${fileName}`
-      //               })
-      //             }
-      //           }
-      //         )
-      //     }
-      //   }
-      // )
     } catch (error) {
       return wrapper.response(res, 400, 'Bad request', error)
     }

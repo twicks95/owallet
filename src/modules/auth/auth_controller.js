@@ -93,10 +93,8 @@ module.exports = {
 
         transporter.sendMail(mailOptions, function (error, info) {
           if (!error) {
-            // console.log('Email sent: ' + info.response)
             return wrapper.response(res, 200, 'Success Register User')
           } else {
-            // console.log(error)
             return wrapper.response(res, 400, 'Failed To Send Email')
           }
         })

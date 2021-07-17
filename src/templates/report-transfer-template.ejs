@@ -2,24 +2,46 @@
 <html>
     <head>
         <style>
-        table {
-            border-collapse: collapse;
+        @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Nunito Sans', sans-serif;
         }
-        table, th, td {
-            border: 1px solid black;
+        span {
+            font-size: 18px;
+            font-style: normal !important;
+            font-weight: 600;
+        }
+        h1 {
+            font-size: 24px;
+            font-style: normal !important;
+        }
+        h2 {
+            font-size: 28px;
+            font-style: normal !important;
+        }
+        h6 {
+            font-size: 14px;    
+            font-style: normal !important;
         }
         </style>
     </head>
     <body>
         <div style="width: 85%; margin: 0 7.5%;">
-            <div style="text-align: center; padding-left: 50px;">            
-                <h3>Test Report</h5>
-                <table>
-                <% if (students.length > 0) { %>
-                    <% students.forEach(student => {%>
-                       <tr><td><%= student.name %></td><td><%= student.email %></td><td><%= student.city %></td><td><%=student.country %></td></tr>
+            <div style="padding-left: 50px;">            
+                <h1>Transaction Report</h1>
+                <% result.forEach(i => {%>
+                       <h2><%= i.transaction_type.toUpperCase() %></h2>
+                       <span>To</span>
+                       <h6><%= i.user_name%></h6>
+                       <span>Email</span>
+                       <h6><%= i.user_email%></h6>
+                       <span>Status</span>
+                       <h6><%= i.transaction_status%></h6>
+                       <span>Notes</span>
+                       <h6><%= i.transaction_notes %></h6>
+                       <h3>IDR<%= i.transaction_amount.toLocaleString('id-ID') %></h3>
+                       <small><%=i.transaction_created_at %></small>
                     <%  });%>
-                <% }%>
                 </table>
              </div>
         </div>
