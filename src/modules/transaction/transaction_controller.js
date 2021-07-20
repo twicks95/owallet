@@ -149,7 +149,7 @@ module.exports = {
                   return wrapper.response(res, 400, 'Export failed 2', err)
                 } else {
                   return wrapper.response(res, 200, 'Export PDF success', {
-                    url: `http://localhost:3004/api/${fileName}`
+                    url: `${process.env.DB_HOST}:${process.env.DB_PORT}/api/${fileName}`
                   })
                 }
               })
